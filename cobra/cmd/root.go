@@ -3,18 +3,23 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"time"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
+	"github.com/spf13/cobra/doc"
 	"github.com/spf13/viper"
 )
 
 var (
-	cfgFile string
-	Verbose bool
-	Source  string
-	Profile string
-	// Port int
+	cfgFile          string
+	Verbose          bool
+	Source           string
+	Profile          string
+	Port             int
+	MarkdownDocs     bool
+	ReStructuredDocs bool
+	ManPageDocs      bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -39,7 +44,6 @@ var rootCmd = &cobra.Command{
 		fmt.Printf("config: %v\n", viper.AllSettings())
 		fmt.Printf("port: %v\n", viper.GetInt("server.port"))
 		fmt.Printf("level: %v\n", viper.GetString("log.level"))
-
 	},
 	// 在Run函数之后执行
 	PostRun: func(cmd *cobra.Command, args []string) {
@@ -66,12 +70,12 @@ func Execute() {
 
 func init() {
 	// 初始化配置文件
-	// cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(initConfig)
 	// 定义 --config 标志，用于指定配置文件的路径
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
 	// 通过 viper 自动绑定命令行标志与配置文件，./newApp --port 9098
-	// rootCmd.PersistentFlags().Int("port", 9090, "服务器端口")
-	// rootCmd.PersistentFlags().String("level", "info", "日志级别")
+	rootCmd.PersistentFlags().Int("port", 9090, "服务器端口")
+	rootCmd.PersistentFlags().String("level", "info", "日志级别")
 	// 持久标识
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
 	// 本地标识
@@ -82,7 +86,10 @@ func init() {
 	// 通过 viper 自动绑定命令行标志与配置文件，./newApp --port 9098
 	// viper.BindPFlag("server.port", rootCmd.PersistentFlags().Lookup("port"))
 	// viper.BindPFlag("log.level", rootCmd.PersistentFlags().Lookup("level"))
-
+	// 生成文档
+	rootCmd.Flags().BoolVarP(&MarkdownDocs, "md-docs", "m", false, "gen Markdown docs")
+	rootCmd.Flags().BoolVarP(&ReStructuredDocs, "rest-docs", "t", false, "gen ReStructured docs")
+	rootCmd.Flags().BoolVarP(&ManPageDocs, "manPage-docs", "a", false, "gen Man Page docs")
 }
 
 // initConfig 读取并解析配置文件
@@ -112,5 +119,29 @@ func initConfig() {
 	viper.SetEnvPrefix("APP")
 	if err := viper.ReadInConfig(); err != nil {
 		fmt.Println("Can't read config:", err)
+	}
+}
+
+func GenDocs() {
+	var err error
+	switch {
+	case MarkdownDocs:
+		err = doc.GenMarkdownTree(rootCmd, "./docs/md")
+	case ReStructuredDocs:
+		err = doc.GenReSTTree(rootCmd, "./docs/rest")
+	case ManPageDocs:
+		t := time.Now()
+		header := &doc.GenManHeader{
+			Title:   "newApp",
+			Section: "1",
+			Manual:  "newApp Manual",
+			Source:  "newApp source",
+			Date:    &t,
+		}
+		err = doc.GenManTree(rootCmd, header, "./docs/man")
+	}
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 }
