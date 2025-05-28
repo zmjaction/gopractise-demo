@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	
+
 	"github.com/spf13/cobra"
 )
 
@@ -16,6 +16,6 @@ var echoCmd = &cobra.Command{
 	},
 }
 
-func init() {
-	rootCmd.AddCommand(echoCmd)
-}
+//func init() {
+//	rootCmd.AddCommand(echoCmd)
+//}

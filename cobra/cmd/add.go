@@ -13,6 +13,6 @@ var addCmd = &cobra.Command{
 	},
 }
 
-func init() {
-	rootCmd.AddCommand(addCmd)
-}
+//func init() {
+//	rootCmd.AddCommand(addCmd)
+//}

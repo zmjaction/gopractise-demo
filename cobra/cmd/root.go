@@ -56,7 +56,9 @@ var rootCmd = &cobra.Command{
 	// TraverseChildren 设为 true 时，在执行命令时会遍历所有子命令。
 	// 这意味着在处理命令时，会递归地检查并处理当前命令的所有子命令，
 	// 常用于需要对整个命令树进行操作的场景，例如查找特定的命令或者应用全局设置等。
-	TraverseChildren: true,
+	//TraverseChildren:   true,
+	DisableSuggestions:         false,
+	SuggestionsMinimumDistance: 1,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -90,6 +92,53 @@ func init() {
 	rootCmd.Flags().BoolVarP(&MarkdownDocs, "md-docs", "m", false, "gen Markdown docs")
 	rootCmd.Flags().BoolVarP(&ReStructuredDocs, "rest-docs", "t", false, "gen ReStructured docs")
 	rootCmd.Flags().BoolVarP(&ManPageDocs, "manPage-docs", "a", false, "gen Man Page docs")
+	// 此方法会覆盖全局的help子命令
+
+	//rootCmd.SetHelpCommand(&cobra.Command{
+	//	Use:    "help",
+	//	Short:  "Custom help command",
+	//	Hidden: true,
+	//	Run: func(cmd *cobra.Command, args []string) {
+	//		fmt.Println("Custom help command")
+	//	},
+	//})
+
+	//rootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+	//	fmt.Println("自定义帮助函数")
+	//	fmt.Printf("命令用法: %s\n", cmd.UseLine())
+	//}
+
+	//	rootCmd.SetHelpTemplate(`Custom Help Template:
+	//Usage:
+	//  {{.UseLine}}
+	//Description:
+	//  {{.Short}}
+	//Commands:
+	//{{- range .Commands}}
+	//  {{.Name}}: {{.Short}}
+	//{{- end}}
+	//`)
+
+	// 自定义 Usage Message
+	//rootCmd.SetUsageFunc(func(command *cobra.Command) error {
+	//	fmt.Printf("Custom usage for command: %s\n", command.Name())
+	//	return nil
+	//})
+
+	// 自定义模版
+	//rootCmd.SetUsageTemplate(`Custom Template:
+	//	Usage: {{.CommandPath}} [command]
+	//
+	//	Description: {{.Short}}
+	//
+	//	Available Commands:
+	//	{{- range .Commands -}}
+	//		{{- if not .Hidden -}}
+	//			{{rpad .Name .NamePadding}}{{.Short}}{{ "\n" }}
+	//		{{- end -}}
+	//	{{- end }}
+	//	`)
+
 }
 
 // initConfig 读取并解析配置文件
@@ -117,9 +166,9 @@ func initConfig() {
 	viper.AutomaticEnv()
 	// 环境变量前缀：APP_SERVER_PORT
 	viper.SetEnvPrefix("APP")
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println("Can't read config:", err)
-	}
+	//if err := viper.ReadInConfig(); err != nil {
+	//	fmt.Println("Can't read config:", err)
+	//}
 }
 
 func GenDocs() {
